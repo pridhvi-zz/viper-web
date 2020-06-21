@@ -322,10 +322,10 @@ class MalwareViewSet(ViperGenericViewSet):
         instance = self.get_object()
 
         try:
-            log.debug("deleting (os.remove) Malware sample at path: {}".format(get_sample_path(instance.sha256)))
-            os.remove(get_sample_path(instance.sha256))
+            log.debug("deleting (os.remove) Malware sample at path: {}".format(get_sample_path(instance.sha256, __project__)))
+            os.remove(get_sample_path(instance.sha256, __project__))
         except OSError:
-            log.error("failed to delete Malware sample: {}".format(get_sample_path(instance.sha256)))
+            log.error("failed to delete Malware sample: {}".format(get_sample_path(instance.sha256, __project__)))
 
         log.debug("deleting (db.delete_file) from DB for Malware ID: {}".format(instance.id))
         db.delete_file(instance.id)
@@ -344,7 +344,7 @@ class MalwareViewSet(ViperGenericViewSet):
 
         # get instance
         instance = self.get_object()
-        dl_file = open(get_sample_path(instance.sha256), 'rb')
+        dl_file = open(get_sample_path(instance.sha256, __project__), 'rb')
 
         # TODO(frennkie) encoding?!?! CLRF, LF ?! XXX
         response = HttpResponse(DjangoFile(dl_file), content_type=instance.mime)
@@ -358,7 +358,7 @@ class MalwareViewSet(ViperGenericViewSet):
         malware = File(uploaded_file_path)
         malware.name = file_name
 
-        if get_sample_path(malware.sha256):
+        if get_sample_path(malware.sha256, project):
             error = {"error": {"code": "DuplicateFileHash",
                                "message": "File hash exists already: {} (sha256: {})".format(malware.name, malware.sha256)}}
             log.error("adding failed: {}".format(error))
