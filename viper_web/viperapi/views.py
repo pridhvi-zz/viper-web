@@ -369,7 +369,7 @@ class MalwareViewSet(ViperGenericViewSet):
             # If something fails in the database (for example unicode strings)
             # we don't want to have the binary lying in the repository with no
             # associated database record.
-            malware_stored_path = store_sample(malware)
+            malware_stored_path = store_sample(malware, __project__)
 
             # run autoruns on the stored sample
             if cfg.get('autorun').enabled:
