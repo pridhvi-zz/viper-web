@@ -369,7 +369,7 @@ class MalwareViewSet(ViperGenericViewSet):
             # If something fails in the database (for example unicode strings)
             # we don't want to have the binary lying in the repository with no
             # associated database record.
-            malware_stored_path = store_sample(malware, __project__)
+            malware_stored_path = store_sample(malware, project)
 
             # run autoruns on the stored sample
             if cfg.get('autorun').enabled:
@@ -502,7 +502,7 @@ class MalwareViewSet(ViperGenericViewSet):
 
         processed = list()
         for item in to_process:
-            processed.append(self._process_uploaded(db, item[0], item[1], tag_list, note_title, note_body, parent_hash,))  # TODO(frennkie) Error handling (e.g. duplicate hashes?!)
+            processed.append(self._process_uploaded(db, item[0], item[1], tag_list, note_title, note_body, parent_hash,__project__))  # TODO(frennkie) Error handling (e.g. duplicate hashes?!)
 
         log.debug("Tmp Dirs: {}".format(tmp_dirs))
         for item in tmp_dirs:
