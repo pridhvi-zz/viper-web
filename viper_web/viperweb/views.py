@@ -37,7 +37,7 @@ from viper.core.database import Database
 from viper.core.plugins import __modules__
 from viper.core.project import __project__, get_project_list
 from viper.core.session import __sessions__
-from viper.core.storage import store_sample, get_sample_path
+from viper.core.storage import store_sample, get_sample_path, remove_sample
 from viper.core.ui.commands import Commands
 
 try:
@@ -263,7 +263,7 @@ def module_cmdline(project=None, cmd_line=None, file_hash=None):
 
 def add_file(file_path, name=None, tags=None, parent=None):
     obj = File(file_path)
-    new_path = store_sample(obj)
+    new_path = store_sample(obj, __project__)
     print(new_path)
 
     if not name:
@@ -272,19 +272,24 @@ def add_file(file_path, name=None, tags=None, parent=None):
     # success = True
     if new_path:
         # Add file to the database.
-        db = Database()
-        db.add(obj=obj, name=name, tags=tags, parent_sha=parent)
+        try:
+            db = Database()
+            db.add(obj=obj, name=name, tags=tags, parent_sha=parent)
+        except Exception as e:
+            log.error("Exception while adding sample to DB: {str(e)}")
+            # Removing stored file since DB write failed
+            remove_sample(new_path)
+            return None
 
         # AutoRun Modules
         if cfg.autorun.enabled:
             autorun_module(obj.sha256)
-            # Close the open session to keep the session table clean
-            __sessions__.close()
+        # Close the open session to keep the session table clean
+        __sessions__.close()
         return obj.sha256
-
     else:
-        # ToDo Remove the stored file if we cant write to DB
-        return
+        log.info("File already exists in database")
+        return None
 
 
 ##
@@ -346,7 +351,7 @@ class UrlDownloadView(LoginRequiredMixin, TemplateView):
             messages.success(request, "stored file in database: {}".format(tf.name))
             return redirect(reverse('main-page-project', kwargs={'project': project}))
         else:
-            messages.error(request, "Unable to Store The File, already in database")
+            messages.error(request, "Unable to Store The File")
             return redirect(reverse("main-page-project", kwargs={"project": project}))
 
 
