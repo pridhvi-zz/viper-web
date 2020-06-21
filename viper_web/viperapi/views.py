@@ -352,7 +352,7 @@ class MalwareViewSet(ViperGenericViewSet):
         return response
 
     @staticmethod
-    def _process_uploaded(db, uploaded_file_path, file_name, tag_list=None, note_title=None, note_body=None, parent_hash=None):
+    def _process_uploaded(db, uploaded_file_path, file_name, tag_list=None, note_title=None, note_body=None, parent_hash=None, project=None):
         """_process_uploaded add one uploaded file to database and to storage then remove uploaded file"""
         log.debug("adding: {} as {}".format(uploaded_file_path, file_name))
         malware = File(uploaded_file_path)
@@ -414,6 +414,8 @@ class MalwareViewSet(ViperGenericViewSet):
     def upload(self, request, project=None, db=None, *args, ** kwargs):
         """Upload file as new Malware instance"""
         session = db.Session()
+        if project:
+            log.debug("Project Name: {}".format(project))
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -500,7 +502,7 @@ class MalwareViewSet(ViperGenericViewSet):
 
         processed = list()
         for item in to_process:
-            processed.append(self._process_uploaded(db, item[0], item[1], tag_list, note_title, note_body, parent_hash))  # TODO(frennkie) Error handling (e.g. duplicate hashes?!)
+            processed.append(self._process_uploaded(db, item[0], item[1], tag_list, note_title, note_body, parent_hash,))  # TODO(frennkie) Error handling (e.g. duplicate hashes?!)
 
         log.debug("Tmp Dirs: {}".format(tmp_dirs))
         for item in tmp_dirs:
