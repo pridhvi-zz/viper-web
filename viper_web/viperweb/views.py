@@ -243,7 +243,7 @@ def module_cmdline(project=None, cmd_line=None, file_hash=None):
                 # if prev commands did not open a session open one on the current file
                 if file_hash:
                     __project__.open(project)
-                    path = get_sample_path(file_hash)
+                    path = get_sample_path(file_hash, __project__)
                     __sessions__.new(path)
                 module = __modules__[root]['obj']()
                 module.set_commandline(args)
@@ -401,7 +401,7 @@ class FileView(LoginRequiredMixin, TemplateView):
             log.error("no sha256 hashed provided")
             raise Http404("no sha256 hashed provided")
 
-        path = get_sample_path(sha256)
+        path = get_sample_path(sha256, __project__)
         if not path:
             raise Http404("could not retrieve file for sha256 hash: {}".format(sha256))
 
@@ -496,7 +496,7 @@ class HexView(LoginRequiredMixin, TemplateView):
 
         # get file path
         __project__.open(project)
-        hex_path = get_sample_path(file_hash)
+        hex_path = get_sample_path(file_hash, __project__)
 
         # create the command string
         hex_cmd = 'hd -s {0} -n {1} {2}'.format(hex_offset, hex_length, hex_path)
@@ -682,7 +682,7 @@ class CuckooCheckOrSubmitView(LoginRequiredMixin, TemplateView):
 
         # Open a session
         try:
-            path = get_sample_path(sha256)
+            path = get_sample_path(sha256, __project__)
             __sessions__.new(path)
         except Exception as err:
             log.error("Error: {}".format(err))
