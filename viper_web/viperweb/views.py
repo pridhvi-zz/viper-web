@@ -781,3 +781,4 @@ class SearchFileView(LoginRequiredMixin, TemplateView):
                                                    'searched_key': key,
                                                    'searched_value': value,
                                                    'projects': get_project_list()})
+            

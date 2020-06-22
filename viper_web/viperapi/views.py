@@ -355,6 +355,7 @@ class MalwareViewSet(ViperGenericViewSet):
     def _process_uploaded(db, uploaded_file_path, file_name, tag_list=None, note_title=None, note_body=None, parent_hash=None, project=None):
         """_process_uploaded add one uploaded file to database and to storage then remove uploaded file"""
         log.debug("adding: {} as {}".format(uploaded_file_path, file_name))
+        log.debug("Project: {}".format(project.name))
         malware = File(uploaded_file_path)
         malware.name = file_name
 
@@ -369,6 +370,7 @@ class MalwareViewSet(ViperGenericViewSet):
             # If something fails in the database (for example unicode strings)
             # we don't want to have the binary lying in the repository with no
             # associated database record.
+            log.debug("Project Name: {}".format(project.name))
             malware_stored_path = store_sample(malware, project)
 
             # run autoruns on the stored sample
@@ -414,11 +416,10 @@ class MalwareViewSet(ViperGenericViewSet):
     def upload(self, request, project=None, db=None, *args, ** kwargs):
         """Upload file as new Malware instance"""
         session = db.Session()
-        if project:
-            log.debug("Project Name: {}".format(project))
-
         project_obj = __project__
         log.info("Project Obj Name: {}".format(project_obj.name))
+        if project:
+            log.debug("Project Name: {}".format(project))
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
